@@ -1,7 +1,21 @@
+import React, { useEffect } from 'react';
+
 import logo from './logo.svg';
 import './App.css';
 
+import SourceManager from './sources';
+
 function App() {
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const load = async () => {
+    const mngr = new SourceManager();
+    await mngr.load();
+  }
+
   return (
     <div className="App">
       <header className="App-header">
