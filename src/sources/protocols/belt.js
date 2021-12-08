@@ -11,6 +11,7 @@ import { getBscPrices, getBscToken } from "../utils/bsc_helpers";
 import { _print, _print_bold } from "../utils/output";
 
 import BELT_ABI from "../abis/belt_abi";
+import BELT_POOL_ABI from "../abis/belt_pool_abi";
 
 export default class Belt {
   constructor() {
@@ -20,12 +21,13 @@ export default class Belt {
         name: "bsc",
         address: "0xD4BbC80b9B102b77B21A06cb77E954049605E6c1",
         abi: BELT_ABI,
+        abi_pool: BELT_POOL_ABI,
       },
     ];
   }
 
   async getData(network, account) {
-    const { address, abi } = this._getConfig(network);
+    const { address, abi, abi_pool } = this._getConfig(network);
     const provider = await network.provider();
     const _contract = new ethers.Contract(address, abi, provider);
 
@@ -98,14 +100,22 @@ async function getBeltPoolInfo(
     };
   }
   const poolToken = await getBscToken(App, poolInfo.want, stakingAddress);
-  const stakedTokens = await chefContract.stakedWantTokens(
+  var stakedTokens = await chefContract.stakedWantTokens(
     poolIndex,
     App.YOUR_ADDRESS
   );
-  const pendingRewardTokens = await chefContract.callStatic[
+  var pendingRewardTokens = await chefContract.callStatic[
     pendingRewardsFunction
   ](poolIndex, App.YOUR_ADDRESS);
-  const staked = stakedTokens / 10 ** poolToken.decimals;
+ 
+  
+  if (poolIndex == 13){
+    const POOL_CONTRACT = new ethers.Contract(poolToken.address, BELT_POOL_ABI, App.provider);
+    pendingRewardTokens = (await POOL_CONTRACT.pendingBELT(App.YOUR_ADDRESS));
+    stakedTokens =        (await POOL_CONTRACT.staked(App.YOUR_ADDRESS));
+  }
+  var staked = stakedTokens / 10 ** poolToken.decimals;
+
   return {
     address: poolInfo.want,
     allocPoints: poolInfo.allocPoint ?? 1,
@@ -135,13 +145,13 @@ async function loadBeltChefContract(
 
   const poolCount = parseInt(await chefContract.poolLength(), 10);
   const totalAllocPoints = await chefContract.totalAllocPoint();
-
+  _print(`======================4B BELT ===========================\n`);
   _print(
     `<a href='https://bscscan.com/address/${chefAddress}' target='_blank'>Staking Contract</a>`
   );
   _print(`Found ${poolCount} pools.\n`);
 
-  _print(`Showing incentivized pools only.\n`);
+  
 
   tokens = {};
 
@@ -201,7 +211,9 @@ async function loadBeltChefContract(
 
   let aprs = [];
   for (let i = 0; i < poolCount; i++) {
-    if (poolPrices[i]) {
+    const userStaked = poolInfos[i].userLPStaked ?? poolInfos[i].userStaked;
+    if (poolPrices[i] && (userStaked > 0) ) {
+    //if (poolPrices[i] ) {
       const apr = printBeltPool(
         App,
         chefAbi,

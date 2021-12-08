@@ -195,9 +195,9 @@ async function loadCeloSushiContract(
   const poolCount = parseInt(await chefContract.poolLength(), 10);
   const totalAllocPoints = await chefContract.totalAllocPoint();
 
-  _print(`Found ${poolCount} pools.\n`);
+  _print(`====================== Sushi Celo ===========================\n`);
 
-  _print(`Showing incentivized pools only.\n`);
+  _print(`Found ${poolCount} pools.\n`);
 
   tokens = {};
 
@@ -259,7 +259,8 @@ async function loadCeloSushiContract(
 
   let aprs = [];
   for (let i = 0; i < poolCount; i++) {
-    if (poolPrices[i]) {
+    const userStaked = poolInfos[i].userLPStaked ?? poolInfos[i].userStaked;
+    if (poolPrices[i] && (userStaked > 0) ) {
       const apr = printCeloSushiPool(
         App,
         chefAbi,
@@ -670,6 +671,9 @@ async function loadMoonriverSushiContract(
   const poolCount = parseInt(await chefContract.poolLength(), 10);
   const totalAllocPoints = await chefContract.totalAllocPoint();
 
+
+  _print(`====================== Sushi Moonriver ===========================\n`);
+
   _print(`Found ${poolCount} pools.\n`);
 
   _print(`Showing incentivized pools only.\n`);
@@ -738,7 +742,8 @@ async function loadMoonriverSushiContract(
 
   let aprs = [];
   for (let i = 0; i < poolCount; i++) {
-    if (poolPrices[i]) {
+    const userStaked = poolInfos[i].userLPStaked ?? poolInfos[i].userStaked;
+    if (poolPrices[i] && (userStaked > 0) ) {
       const apr = printMoonriverSushiPool(
         App,
         chefAbi,

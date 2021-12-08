@@ -926,7 +926,9 @@ async function loadBscChefContract(
 
   let aprs = [];
   for (let i = 0; i < poolCount; i++) {
-    if (poolPrices[i]) {
+    const userStaked = poolInfos[i].userLPStaked ?? poolInfos[i].userStaked;
+    // if (poolPrices[i] && (userStaked > 0) ) {
+    if (poolPrices[i] && (userStaked > 0) ) {
       const apr = printChefPool(
         App,
         chefAbi,
