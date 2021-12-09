@@ -676,8 +676,6 @@ async function loadMoonriverSushiContract(
 
   _print(`Found ${poolCount} pools.\n`);
 
-  _print(`Showing incentivized pools only.\n`);
-
   tokens = {};
 
   const rewardTokenAddress = await chefContract.callStatic[
